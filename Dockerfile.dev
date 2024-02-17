@@ -14,8 +14,10 @@ WORKDIR $APP_HOME
 
 # install
 COPY . $APP_HOME
-RUN pip install -r requirements-dev.txt
-RUN pip install -e .
+RUN pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements-dev.txt
+# Como tem o arquivo pyproject.toml (manifesto com tudo que precisa para configurar o projeto, pode usar como exemplo mudando 
+# apenas os valores, mas ja tem as dependecias e os arquivos de requeriment q vai usar para instalar e montar todo ambiente necessario
+RUN pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -e .
 
 RUN chown -R app:app $APP_HOME
 USER app
