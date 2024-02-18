@@ -1,3 +1,7 @@
+
+#uvicorn dundie.app:app --reload
+
+
 from fastapi import FastAPI
 
 app = FastAPI(

@@ -21,7 +21,8 @@ services:
     build: postgres
     image: dundie_postgres-13-alpine-multi-user
     volumes:
-      - $HOME/.postgres/dundie_db/data/postgresql:/var/lib/postgresql/data
+      #- $HOME/.postgres/dundie_db/data/postgresql:/var/lib/postgresql/data
+      - C://Users//f_vit//OneDrive//Python//projeto//dundie-api/.postgres/dundie_db/data/postgresql:/var/lib/postgresql/data
     ports:
       # ATENÇÃO: Mude para 5432: se precisar acessar via host
       - "5435:5432"

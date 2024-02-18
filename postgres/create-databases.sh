@@ -3,6 +3,7 @@
 set -e
 set -u
 
+#funcao para criar banco e usuario
 function create_user_and_database() {
 	local database=$1
 	echo "Creating user and database '$database'"
