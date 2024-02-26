@@ -1,6 +1,8 @@
 #uvicorn dundie.app:app --reload
 
 from fastapi import FastAPI
+from .routes import main_router
+
 
 app = FastAPI(
     title="dundie",
@@ -8,7 +10,7 @@ app = FastAPI(
     description="dundie is a rewards API",
 )
 
-
+app.include_router(main_router)
 
 ######### Codigo usado sem a ingestao de dependencia
 # from dundie.db import engine
