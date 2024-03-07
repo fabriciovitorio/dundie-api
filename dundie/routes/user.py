@@ -6,9 +6,9 @@ from sqlmodel import Session, select
 from sqlalchemy.exc import IntegrityError
 
 from dundie.db import ActiveSession
-from dundie.models.user import User, UserRequest, UserResponse, UserProfilePatchRequest
+from dundie.models.user import User, UserRequest, UserResponse, UserProfilePatchRequest, UserPasswordPatchRequest
 
-from dundie.auth import AuthenticatedUser, SuperUser
+from dundie.auth import AuthenticatedUser, SuperUser, CanChangeUserPassword
 
 router = APIRouter()
 
@@ -65,6 +65,19 @@ async def update_user(
     user.avatar = patch_data.avatar
     user.bio = patch_data.bio
 
+    session.add(user)
+    session.commit()
+    session.refresh(user)
+    return user
+
+@router.post("/{username}/password/", response_model=UserResponse)
+async def change_password(
+    *,
+    session: Session = ActiveSession,
+    patch_data: UserPasswordPatchRequest,
+    user: User = CanChangeUserPassword
+):
+    user.password = patch_data.hashed_password  # pyright: ignore
     session.add(user)
     session.commit()
     session.refresh(user)
