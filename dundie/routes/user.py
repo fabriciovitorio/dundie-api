@@ -10,6 +10,8 @@ from dundie.models.user import User, UserRequest, UserResponse, UserProfilePatch
 
 from dundie.auth import AuthenticatedUser, SuperUser, CanChangeUserPassword
 
+from dundie.tasks.user import try_to_send_pwd_reset_email
+
 router = APIRouter()
 
 
@@ -82,3 +84,12 @@ async def change_password(
     session.commit()
     session.refresh(user)
     return user
+
+# view
+@router.post("/pwd_reset_token/")
+async def send_password_reset_token(*, email: str = Body(embed=True)):
+    """Sends an email with the token to reset password."""
+    try_to_send_pwd_reset_email(email)
+    return {
+        "message": "If we found a user with that email, we sent a password reset token to it."
+    }
