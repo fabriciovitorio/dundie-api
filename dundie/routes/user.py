@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 from fastapi.exceptions import HTTPException
 from sqlmodel import Session, select
 from sqlalchemy.exc import IntegrityError
