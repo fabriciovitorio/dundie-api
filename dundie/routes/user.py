@@ -48,7 +48,7 @@ async def create_user(*, session: Session = ActiveSession, user: UserRequest):
 
     session.refresh(db_user)
     return db_user
-    
+
 @router.patch("/{username}/", response_model=UserResponse)
 async def update_user(
     *,
