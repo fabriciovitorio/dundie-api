@@ -6,31 +6,75 @@ from sqlmodel import Session, select
 from sqlalchemy.exc import IntegrityError
 
 from dundie.db import ActiveSession
-from dundie.models.user import User, UserRequest, UserResponse, UserProfilePatchRequest, UserPasswordPatchRequest
+from dundie.models.user import User, UserRequest, UserResponse, UserResponseWithBalance, UserProfilePatchRequest, UserPasswordPatchRequest
 
 from dundie.auth import AuthenticatedUser, SuperUser, CanChangeUserPassword
 
 from dundie.tasks.user import try_to_send_pwd_reset_email
 
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+from pydantic import parse_obj_as
+from dundie.auth import ShowBalanceField
+
 router = APIRouter()
 
 
-@router.get("/", response_model=List[UserResponse], dependencies=[AuthenticatedUser])
-async def list_users(*, session: Session = ActiveSession):
-    """List all users."""
+#### list user sem serializer condicional e com necessidade de autenticacao
+
+# @router.get("/", response_model=List[UserResponse], dependencies=[AuthenticatedUser])
+# async def list_users(*, session: Session = ActiveSession):
+#     """List all users."""
+#     users = session.exec(select(User)).all()
+#     return users
+
+@router.get(
+    "/",
+    response_model=List[UserResponse] | List[UserResponseWithBalance],
+    response_model_exclude_unset=True,
+)
+async def list_users(
+    *, session: Session = ActiveSession, show_balance_field: bool = ShowBalanceField
+):
+    """List all users.
+
+    NOTES:
+    - This endpoint can be accessed with a token authentication
+    - show_balance query parameter takes effect only for authenticated superuser.
+    """
     users = session.exec(select(User)).all()
+    if show_balance_field:
+        users_with_balance = parse_obj_as(List[UserResponseWithBalance], users)
+        return JSONResponse(jsonable_encoder(users_with_balance))
     return users
 
+# @router.get("/{username}/", response_model=UserResponse)
+# async def get_user_by_username(
+#     *, session: Session = ActiveSession, username: str
+# ):
+#     """Get user by username"""
+#     query = select(User).where(User.username == username)
+#     user = session.exec(query).first()
+#     if not user:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return user
 
-@router.get("/{username}/", response_model=UserResponse)
+@router.get(
+    "/{username}/",
+    response_model=UserResponse | UserResponseWithBalance,
+    response_model_exclude_unset=True,
+)
 async def get_user_by_username(
-    *, session: Session = ActiveSession, username: str
+    *, session: Session = ActiveSession, username: str, show_balance_field: bool = ShowBalanceField
 ):
     """Get user by username"""
     query = select(User).where(User.username == username)
     user = session.exec(query).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if show_balance_field:
+        user_with_balance = parse_obj_as(UserResponseWithBalance, user)
+        return JSONResponse(jsonable_encoder(user_with_balance))
     return user
 
 @router.post("/", response_model=UserResponse, status_code=201, dependencies=[SuperUser])
