@@ -104,6 +104,14 @@ class UserRequest(BaseModel):
 class UserProfilePatchRequest(BaseModel):
     avatar: Optional[str] = None
     bio: Optional[str] = None
+    
+    ###Valida que recebeu um payload com dados preenchidos, para nao receber um payload vazio
+    @root_validator(pre=True)
+    def ensure_values(cls, values):
+        if not values:
+            raise HTTPException(status_code=400,detail="Bad request, no data informed")
+        
+        return values
 
 class UserPasswordPatchRequest(BaseModel):
     password: str
