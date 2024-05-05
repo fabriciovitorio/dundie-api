@@ -4,3 +4,6 @@ docker compose exec api dundie --help
 docker compose exec api dundie user-list
 
 docker compose exec api dundie shell
+
+
+docker compose logs worker --follow

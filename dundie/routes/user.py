@@ -17,6 +17,8 @@ from fastapi.responses import JSONResponse
 from pydantic import parse_obj_as
 from dundie.auth import ShowBalanceField
 
+from dundie.queue import queue
+
 router = APIRouter()
 
 
@@ -136,7 +138,10 @@ async def send_password_reset_token(
     email: str = Body(embed=True),
     background_tasks: BackgroundTasks,  # NEW
 ):
-    background_tasks.add_task(try_to_send_pwd_reset_email, email=email)  # NEW
+    # antes do enfileiramento
+    ##background_tasks.add_task(try_to_send_pwd_reset_email, email=email)  # NEW
+    
+    queue.enqueue(try_to_send_pwd_reset_email, email=email)
     return {
         "message": "If we found a user with that email, we sent a password reset token to it."
     }
